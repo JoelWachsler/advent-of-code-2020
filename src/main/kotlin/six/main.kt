@@ -2208,6 +2208,34 @@ fun partOne() {
     println("Res is: $res")
 }
 
+fun groupChars(s: String): List<Set<String>> = s
+    .split("\n")
+    .filter { it.isNotBlank() }
+    .map { getChars(it) }
+
+fun unionAnswers(groupAnswers: List<Set<String>>): Int {
+    val groupCount = mutableMapOf<String, Int>()
+
+    groupAnswers.forEach { personAnswers ->
+        personAnswers.forEach { personAnswer ->
+            groupCount[personAnswer] = groupCount.getOrPut(personAnswer, { 0 }) + 1
+        }
+    }
+
+    return groupCount
+        .filter { it.value == groupAnswers.size }
+        .count()
+}
+
+fun partTwo() {
+    val res = realInput.split("\n\n")
+        .map { groupChars(it) }
+        .map { unionAnswers(it) }
+        .sum()
+
+    println("Res is: $res")
+}
+
 fun main() {
-    partOne()
+    partTwo()
 }
