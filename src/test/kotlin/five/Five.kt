@@ -12,22 +12,22 @@ internal class Five {
 
         @Test
         fun first() {
-            assertEquals(357, partOneTest("FBFBBFFRLR"));
+            assertEquals(357, toSeatId("FBFBBFFRLR"));
         }
 
         @Test
         fun second() {
-            assertEquals(567, partOneTest("BFFFBBFRRR"));
+            assertEquals(567, toSeatId("BFFFBBFRRR"));
         }
 
         @Test
         fun third() {
-            assertEquals(119, partOneTest("FFFBBBFRRR"));
+            assertEquals(119, toSeatId("FFFBBBFRRR"));
         }
 
         @Test
         fun fourth() {
-            assertEquals(820, partOneTest("BBFFBBFRLL"));
+            assertEquals(820, toSeatId("BBFFBBFRLL"));
         }
     }
 
