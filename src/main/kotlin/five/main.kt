@@ -968,7 +968,7 @@ fun partTwo() {
             }
             else -> {
                 if ((res[prev] + 1) != entry || entry != (res[next] - 1)) {
-                    println("Found missmatch!")
+                    println("Found mismatch!")
                     println("prev: ${res[prev]}, current: ${entry}, next: ${res[next]}")
                 }
             }
