@@ -2,7 +2,7 @@ package extension
 
 val dummy = object {}
 
-fun String.getResourceAsText() = dummy.javaClass.getResource(this)
+fun String.resourceAsText() = dummy.javaClass.getResource(this)
     .readText()
     .replace("\r\n", "\n")
 

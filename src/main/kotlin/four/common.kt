@@ -1,6 +1,6 @@
 package four
 
-import extension.getResourceAsText
+import extension.resourceAsText
 import extension.splitByBlankLine
 
 fun convertToMap(entry: String) = entry
@@ -83,6 +83,6 @@ fun validateInt(str: String, min: Int, max: Int): Boolean {
     return true
 }
 
-fun input() = "/four/input.txt".getResourceAsText().splitByBlankLine()
+fun input() = "/four/input.txt".resourceAsText().splitByBlankLine()
 
 
