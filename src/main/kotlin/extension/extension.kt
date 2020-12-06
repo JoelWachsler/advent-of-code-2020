@@ -7,3 +7,5 @@ fun String.resourceAsText() = dummy.javaClass.getResource(this)
     .replace("\r\n", "\n")
 
 fun String.splitByBlankLine() = this.split("\n\n")
+
+fun String.splitByNewline() = this.split("\n")
