@@ -1,12 +1,20 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.10"
+    kotlin("jvm") version "1.4.21"
     application
+    idea
 }
 
 group = "se.wachsler"
 version = "1.0-SNAPSHOT"
+
+idea {
+    module {
+        isDownloadJavadoc = true
+        isDownloadSources = true
+    }
+}
 
 repositories {
     mavenCentral()
