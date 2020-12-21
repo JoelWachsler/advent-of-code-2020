@@ -4,6 +4,8 @@ import extension.resourceAsText
 import extension.splitByNewline
 import twelve.CardinalDirection.*
 import twelve.Degrees.*
+import twelve.PartOne.Command.*
+import twelve.PartOne.State
 import twelve.RotationDirection.*
 import kotlin.math.absoluteValue
 
@@ -60,109 +62,116 @@ fun parseRotationDirection(char: String): RotationDirection? = when (char) {
     else -> null
 }
 
-sealed class Command {
-    abstract fun applyToState(state: State): State
-}
 
-data class CardinalCommand(val cardinalDirection: CardinalDirection, val amount: Int) : Command() {
+class PartOne {
 
-    override fun applyToState(state: State): State {
-        return when (cardinalDirection) {
-            NORTH -> state.copy(coordinate = state.coordinate.north(amount))
-            WEST -> state.copy(coordinate = state.coordinate.west(amount))
-            SOUTH -> state.copy(coordinate = state.coordinate.south(amount))
-            EAST -> state.copy(coordinate = state.coordinate.east(amount))
-        }
-    }
-}
+    sealed class Command {
+        abstract fun applyToState(state: State): State
 
-data class RotationalCommand(val rotationDirection: RotationDirection) : Command() {
+        data class CardinalCommand(val cardinalDirection: CardinalDirection, val amount: Int) : Command() {
 
-    private fun applyRotation(direction: CardinalDirection): CardinalDirection {
-        return when (direction) {
-            NORTH -> when (rotationDirection) {
-                LEFT -> WEST
-                RIGHT -> EAST
-                FORWARD -> NORTH
-            }
-            WEST -> when (rotationDirection) {
-                LEFT -> SOUTH
-                RIGHT -> NORTH
-                FORWARD -> WEST
-            }
-            SOUTH -> when (rotationDirection) {
-                LEFT -> EAST
-                RIGHT -> WEST
-                FORWARD -> SOUTH
-            }
-            EAST -> when (rotationDirection) {
-                LEFT -> NORTH
-                RIGHT -> SOUTH
-                FORWARD -> EAST
+            override fun applyToState(state: State): State {
+                return when (cardinalDirection) {
+                    NORTH -> state.copy(coordinate = state.coordinate.north(amount))
+                    WEST -> state.copy(coordinate = state.coordinate.west(amount))
+                    SOUTH -> state.copy(coordinate = state.coordinate.south(amount))
+                    EAST -> state.copy(coordinate = state.coordinate.east(amount))
+                }
             }
         }
-    }
 
-    override fun applyToState(state: State) = state.copy(cardinalDirection = applyRotation(state.cardinalDirection))
-}
+        data class RotationalCommand(val rotationDirection: RotationDirection) : Command() {
 
-data class ForwardCommand(val amount: Int) : Command() {
+            private fun applyRotation(direction: CardinalDirection): CardinalDirection {
+                return when (direction) {
+                    NORTH -> when (rotationDirection) {
+                        LEFT -> WEST
+                        RIGHT -> EAST
+                        FORWARD -> NORTH
+                    }
+                    WEST -> when (rotationDirection) {
+                        LEFT -> SOUTH
+                        RIGHT -> NORTH
+                        FORWARD -> WEST
+                    }
+                    SOUTH -> when (rotationDirection) {
+                        LEFT -> EAST
+                        RIGHT -> WEST
+                        FORWARD -> SOUTH
+                    }
+                    EAST -> when (rotationDirection) {
+                        LEFT -> NORTH
+                        RIGHT -> SOUTH
+                        FORWARD -> EAST
+                    }
+                }
+            }
 
-    private fun forward(cardinalDirection: CardinalDirection, inputCoordinate: Coordinate): Coordinate =
-        when (cardinalDirection) {
-            NORTH -> inputCoordinate.north(amount)
-            WEST -> inputCoordinate.west(amount)
-            SOUTH -> inputCoordinate.south(amount)
-            EAST -> inputCoordinate.east(amount)
+            override fun applyToState(state: State) = state.copy(cardinalDirection = applyRotation(state.cardinalDirection))
         }
 
-    override fun applyToState(state: State) =
-        state.copy(coordinate = forward(state.cardinalDirection, state.coordinate))
-}
+        data class ForwardCommand(val amount: Int) : Command() {
 
-fun parseCommand(char: String, amount: Int): List<Command> {
-    val card = parseCardinalDirection(char)
-    if (card != null) {
-        return listOf(CardinalCommand(card, amount))
-    }
+            private fun forward(cardinalDirection: CardinalDirection, inputCoordinate: Coordinate): Coordinate =
+                when (cardinalDirection) {
+                    NORTH -> inputCoordinate.north(amount)
+                    WEST -> inputCoordinate.west(amount)
+                    SOUTH -> inputCoordinate.south(amount)
+                    EAST -> inputCoordinate.east(amount)
+                }
 
-    val rot = parseRotationDirection(char)
-    if (rot != null) {
-        val rotCommand = RotationalCommand(rot)
-
-        if (rot == FORWARD) {
-            return listOf(ForwardCommand(amount))
-        }
-
-        return when (parseDegrees(amount)) {
-            DEG90 -> listOf(rotCommand)
-            DEG180 -> listOf(rotCommand, rotCommand)
-            DEG270 -> listOf(rotCommand, rotCommand, rotCommand)
+            override fun applyToState(state: State) =
+                state.copy(coordinate = forward(state.cardinalDirection, state.coordinate))
         }
     }
 
-    throw Error("Invalid...")
+    fun parseCommand(char: String, amount: Int): List<Command> {
+        val card = parseCardinalDirection(char)
+        if (card != null) {
+            return listOf(CardinalCommand(card, amount))
+        }
+
+        val rot = parseRotationDirection(char)
+        if (rot != null) {
+            val rotCommand = RotationalCommand(rot)
+
+            if (rot == FORWARD) {
+                return listOf(ForwardCommand(amount))
+            }
+
+            return when (parseDegrees(amount)) {
+                DEG90 -> listOf(rotCommand)
+                DEG180 -> listOf(rotCommand, rotCommand)
+                DEG270 -> listOf(rotCommand, rotCommand, rotCommand)
+            }
+        }
+
+        throw Error("Invalid...")
+    }
+
+    fun parseInput(line: String): List<Command> {
+        val parseRegex = Regex("(\\w)(\\d+)")
+        val regexResult = parseRegex.findAll(line).toList()
+            .flatMap { it.groups }
+            .mapNotNull { it }
+
+        val amount = regexResult[2].value.toInt()
+
+        return parseCommand(regexResult[1].value, amount)
+    }
+
+    fun parseInput(lines: List<String>) = lines
+        .map { parseInput(it) }
+        .flatten()
+
+    data class State(val coordinate: Coordinate, val cardinalDirection: CardinalDirection)
+
 }
-
-fun parseInput(line: String): List<Command> {
-    val parseRegex = Regex("(\\w)(\\d+)")
-    val regexResult = parseRegex.findAll(line).toList()
-        .flatMap { it.groups }
-        .mapNotNull { it }
-
-    val amount = regexResult[2].value.toInt()
-
-    return parseCommand(regexResult[1].value, amount)
-}
-
-fun parseInput(lines: List<String>) = lines
-    .map { parseInput(it) }
-    .flatten()
-
-data class State(val coordinate: Coordinate, val cardinalDirection: CardinalDirection)
 
 fun runPartOne(input: List<String>) {
-    val commands = parseInput(input)
+    val partOne = PartOne()
+
+    val commands = partOne.parseInput(input)
 
     val initialState = State(Coordinate(0, 0), EAST)
     var currentState = initialState
